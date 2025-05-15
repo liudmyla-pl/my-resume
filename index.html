@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моє Резюме</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Людмила Палій</h1>
+            <p class="contact-info">Електронна пошта: lyuda2017pay@gmail.com | Телефон: +380 634 141 008</p>
+        </header>
+
+        <section class="summary">
+            <h2>Про себе</h2>
+            <p> Відповідальна, швидко навчаюся, люблю працювати в команді та постійно вдосконалювати свої знання. Маю базові навички роботи з Linux, Python та мережевими протоколами.</p>
+        </section>
+
+
+        <section class="education">
+            <h2>Освіта</h2>
+            <div class="degree">
+                <h3>НУ "Львівська політехніка" | Кібербезпека | 2022-2026</h3>
+            </div>
+            </section>
+
+        <section class="skills">
+            <h2>Навички</h2>
+            <ul>
+                <li>Основи мережевої безпеки (TCP/IP, моделі OSI)</li>
+                <li>Основи Python, C/C++, Bash</li>
+                <li>Робота з віртуальними машинами (VirtualBox)</li>
+                <li>Використання Wireshark, Nmap, Kali Linux</li>
+                <li>Основи криптографії (шифрування, хеш-функції)</li>
+                </ul>
+        </section>
+
+        <section class="languages">
+            <h2>Мови</h2>
+            <ul>
+                <li>Українська (Рідна)</li>
+                <li>Англійська (В2)</li>
+                </ul>
+        </section>
+
+        <footer>
+            <p>© 2025 Палій Людмила. Всі права захищено.</p>
+            <p>Поточна дата: <span id="current-date"></span></p>
+        </footer>
+    </div>
+    <script>
+        // 1. Зберігання даних у браузері
+        function saveDataToLocalStorage() {
+            const browserInfo = {
+                appName: navigator.appName,
+                appVersion: navigator.appVersion,
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled
+            };
+            localStorage.setItem('browserInfo', JSON.stringify(browserInfo));
+            console.log('Інформацію про браузер збережено в localStorage');
+        }
+
+        function displayLocalStorageInfo() {
+            const footer = document.querySelector('footer');
+            if (footer) {
+                const storedInfo = localStorage.getItem('browserInfo');
+                if (storedInfo) {
+                    const parsedInfo = JSON.parse(storedInfo);
+                    let infoText = 'Інформація про браузер (localStorage): ';
+                    for (const key in parsedInfo) {
+                        infoText += `${key}: ${parsedInfo[key]}, `;
+                    }
+                    footer.innerHTML += `<p>${infoText.slice(0, -2)}</p>`;
+                } else {
+                    footer.innerHTML += '<p>Інформація про браузер у localStorage відсутня.</p>';
+                }
+            }
+        }
+
+        // Викликаємо функції після завантаження сторінки
+        window.onload = function() {
+            saveDataToLocalStorage();
+            displayLocalStorageInfo();
+            setTimeout(showFeedbackModal, 60000); // 60000 мілісекунд = 1 хвилина
+            checkAndSetTheme(); // Перевіряємо та встановлюємо тему при завантаженні
+            document.getElementById("current-date").textContent = new Date().toLocaleDateString("uk-UA");
+
+        };
+
+        // 2. Відображення динамічного вмісту отриманого із серверу
+        function fetchComments() {
+            const variantNumber = 21; // Твій номер варіанту
+            const apiUrl = `https://jsonplaceholder.typicode.com/posts/${variantNumber}/comments`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(comments => {
+                    const commentsSection = document.createElement('section');
+                    commentsSection.innerHTML = '<h2>Коментарі</h2>';
+                    const commentsList = document.createElement('ul');
+                    comments.forEach(comment => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `<strong>${comment.name} (${comment.email}):</strong> ${comment.body}`;
+                        commentsList.appendChild(listItem);
+                    });
+                    commentsSection.appendChild(commentsList);
+                    document.querySelector('.container').appendChild(commentsSection);
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні коментарів:', error);
+                    const commentsSection = document.createElement('section');
+                    commentsSection.innerHTML = '<p>Не вдалося завантажити коментарі.</p>';
+                    document.querySelector('.container').appendChild(commentsSection);
+                });
+        }
+
+        // Викликаємо функцію для отримання коментарів після завантаження сторінки
+        document.addEventListener('DOMContentLoaded', fetchComments);
+
+        // 3. Відправлення форми зворотнього зв'язку
+        function showFeedbackModal() {
+            const modal = document.createElement('div');
+            modal.id = 'feedbackModal';
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = '#fff';
+            modal.style.padding = '20px';
+            modal.style.border = '1px solid #ccc';
+            modal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            modal.style.zIndex = '1000';
+
+            const form = document.createElement('form');
+            form.action = 'https://formspree.io/f/mdkgyero'; // Замініть на свій endpoint
+            form.method = 'POST';
+
+            form.innerHTML = `
+                <h2>Зворотній зв'язок</h2>
+                <div>
+                    <label for="name">Ім'я:</label>
+                    <input type="text" id="name" name="name" required><br><br>
+                </div>
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required><br><br>
+                </div>
+                <div>
+                    <label for="phone">Номер телефону:</label>
+                    <input type="tel" id="phone" name="phone"><br><br>
+                </div>
+                <div>
+                    <label for="message">Повідомлення:</label><br>
+                    <textarea id="message" name="message" rows="5" cols="30"></textarea><br><br>
+                </div>
+                <button type="submit">Відправити</button>
+            `;
+
+            modal.appendChild(form);
+            document.body.appendChild(modal);
+        }
+
+        // 4. Перехід на нічний/денний режим
+        const themeSwitcher = document.createElement('button');
+        themeSwitcher.textContent = 'Переключити тему';
+        themeSwitcher.addEventListener('click', toggleTheme);
+        document.querySelector('header').appendChild(themeSwitcher);
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+
+        function checkAndSetTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+            } else {
+                const currentHour = new Date().getHours();
+                if (currentHour >= 7 && currentHour < 21) {
+                    document.body.classList.remove('dark-theme');
+                } else {
+                    document.body.classList.add('dark-theme');
+                }
+            }
+        }
+
+        // Додаємо стилі для нічної теми (можна додати в styles.css)
+        const style = document.createElement('style');
+        style.textContent = `
+            body.dark-theme {
+                background-color: #333;
+                color: #f0f0f0;
+            }
+            body.dark-theme h1,
+            body.dark-theme h2,
+            body.dark-theme h3,
+            body.dark-theme p,
+            body.dark-theme li,
+            body.dark-theme label {
+                color: #f0f0f0;
+            }
+            body.dark-theme input,
+            body.dark-theme textarea {
+                background-color: #555;
+                color: #f0f0f0;
+                border: 1px solid #777;
+            }
+            body.dark-theme button {
+                background-color: #555;
+                color: #f0f0f0;
+                border: 1px solid #777;
+            }
+            body.dark-theme button:hover {
+                background-color: #777;
+            }
+            #feedbackModal {
+                background-color: #444 !important;
+                color: #f0f0f0 !important;
+                border: 1px solid #666 !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+            }
+            #feedbackModal input,
+            #feedbackModal textarea {
+                background-color: #666 !important;
+                color: #f0f0f0 !important;
+                border: 1px solid #888 !important;
+            }
+            #feedbackModal button {
+                background-color: #666 !important;
+                color: #f0f0f0 !important;
+                border: 1px solid #888 !important;
+            }
+            #feedbackModal button:hover {
+                background-color: #888 !important;
+            }
+        `
+        document.head.appendChild(style);
+       
+    </script>
+</body>
+</html>
